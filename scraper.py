@@ -2,6 +2,7 @@
 Web scraper for Kalvium attendance button detection
 Uses Selenium with Google login
 """
+import os
 import time
 import logging
 from selenium import webdriver
@@ -9,8 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +31,15 @@ class AttendanceBot:
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
             options.add_argument('--start-maximized')
+            options.add_argument('--disable-gpu')
+
+            # On macOS, explicitly set Chrome binary if available
+            mac_chrome_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            if os.path.exists(mac_chrome_path):
+                options.binary_location = mac_chrome_path
             
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=options)
+            # Use Selenium Manager (built into Selenium 4.6+) to resolve driver automatically
+            self.driver = webdriver.Chrome(options=options)
             logger.info("WebDriver initialized successfully")
             return True
         except Exception as e:
