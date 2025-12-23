@@ -115,24 +115,14 @@ async def check_attendance():
                 logger.error("Failed to initialize scraper bot")
                 return
         
-        # Check attendance status
-        # Only refresh if previous attempt found nothing
-        status = scraper_bot.get_attendance_status()
-        if status == 'NONE':
+        # Refresh and check for the Mark Attendance button
+        if not attendance_marked:
             scraper_bot.refresh_page()
-            status = scraper_bot.get_attendance_status()
-        if status == 'PRESENT':
-            if not attendance_marked:
-                logger.info("Already marked present; skipping ping for this class")
-                attendance_marked = True
-        elif status == 'LIVE':
-            if not attendance_marked:
-                logger.info("Attendance is live and not yet marked")
+            if scraper_bot.check_attendance_button():
+                logger.info("Attendance button detected!")
                 if await send_attendance_ping():
                     attendance_marked = True
                     logger.info(f"Successfully pinged @everyone for class {current_class_period}")
-        else:
-            logger.debug("Attendance not live yet")
     
     except Exception as e:
         logger.error(f"Error in check_attendance task: {e}")

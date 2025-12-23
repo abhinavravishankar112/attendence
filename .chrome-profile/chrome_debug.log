@@ -1,0 +1,47 @@
+[78687:3158223:1223/104520.354223:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:206] No machine level policy manager exists.
+[78687:3158271:1223/104523.845648:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[78687:3158271:1223/104546.029612:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[78687:3158271:1223/104633.489545:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[78687:3158223:1223/104647.852902:INFO:CONSOLE:9] "[dotLottie-common]: Error loading animation: Failed to fetch", source: https://kalvium.community/assets/lottie-c6484d69.js (9)
+[78694:3158334:1223/104647.938898:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 97
+[78694:3158334:1223/104649.148440:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 143
+[78694:3158334:1223/104649.148488:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 141
+[78694:3158334:1223/104649.148873:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 141
+[78694:3158334:1223/104649.168379:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 143
+[78694:3158334:1223/104649.168431:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 145
+[78694:3158334:1223/104649.239260:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 147
+[78694:3158334:1223/104649.251618:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 145
+[78694:3158334:1223/104650.444348:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 179
+[78694:3158334:1223/104650.450542:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 181
+[78694:3158334:1223/104650.456386:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 187
+[78694:3158334:1223/104650.480732:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 185
+[78694:3158334:1223/104650.492628:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 183
+[78694:3158334:1223/104651.943674:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 223
+[78694:3158334:1223/104653.362300:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 129
+[78694:3158334:1223/104653.440769:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 243
+[78687:3158223:1223/104654.555433:INFO:CONSOLE:9] "[dotLottie-common]: Error loading animation: Failed to fetch", source: https://kalvium.community/assets/lottie-c6484d69.js (9)
+[78694:3158334:1223/104654.559350:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 277
+[78694:3158334:1223/104654.660729:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 289
+[78694:3158334:1223/104654.666590:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 291
+[78694:3158334:1223/104654.672692:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 293
+[78694:3158334:1223/104657.310792:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 271
+[78694:3158334:1223/104657.326572:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 273
+[78694:3158334:1223/104657.358939:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 275
+[78694:3158334:1223/104657.358993:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 277
+[78694:3158334:1223/104657.360514:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 337
+[78694:3158334:1223/104657.391671:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 335
+[78694:3158334:1223/104659.664342:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 373
+[78694:3158334:1223/104659.720596:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 375
+[78694:3158334:1223/104701.088503:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 313
+[78694:3158334:1223/104701.088546:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 311
+[78694:3158334:1223/104701.088557:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 307
+[78694:3158334:1223/104701.088565:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 305
+[78694:3158334:1223/104701.092683:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 309
+[78694:3158334:1223/104701.112408:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 303
+[78694:3158334:1223/104701.118319:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 417
+[78694:3158334:1223/104701.172611:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 415
+[78694:3158334:1223/104701.197122:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 419
+[78694:3158334:1223/104701.208615:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 421
+[78687:3158271:1223/104810.466460:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[78694:3158332:1223/104913.569747:WARNING:net/extras/sqlite/sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net/extras/sqlite/sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[78694:3158332:1223/104913.569764:WARNING:net/extras/sqlite/sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net/extras/sqlite/sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.

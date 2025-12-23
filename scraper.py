@@ -36,6 +36,13 @@ class AttendanceBot:
             options.add_argument('--no-default-browser-check')
             options.add_argument('--disable-sync')
             options.add_argument('--disable-features=AccountConsistency,SignInProfileCreation,ChromeWhatsNewUI')
+            options.add_argument('--disable-blink-features=AutomationControlled')
+
+            # Persist session across runs to avoid repeated Google login/2FA
+            profile_dir = os.path.join(os.path.dirname(__file__), '.chrome-profile')
+            os.makedirs(profile_dir, exist_ok=True)
+            options.add_argument(f'--user-data-dir={profile_dir}')
+            options.add_argument('--profile-directory=Default')
 
             # On macOS, explicitly set Chrome binary if available
             mac_chrome_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -50,6 +57,27 @@ class AttendanceBot:
             logger.error(f"Failed to initialize WebDriver: {e}")
             return False
 
+    def is_dashboard_loaded(self):
+        """Heuristically determine if Kalvium dashboard is loaded (already logged in)."""
+        try:
+            wait = WebDriverWait(self.driver, 5)
+            # Look for stable dashboard strings
+            candidates = [
+                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'your kalvium apps')]",
+                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'my day')]",
+                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'attendance hub')]",
+            ]
+            for xp in candidates:
+                try:
+                    el = wait.until(EC.presence_of_element_located((By.XPATH, xp)))
+                    if el:
+                        return True
+                except Exception:
+                    continue
+            return False
+        except Exception:
+            return False
+
     def login_with_google(self):
         """Login to Kalvium using Google account.
         Clicks "Continue with Google" and completes OAuth flow.
@@ -59,6 +87,13 @@ class AttendanceBot:
             self.driver.get(self.url)
 
             wait = WebDriverWait(self.driver, 20)
+
+            # If already logged in (persisted session), skip Google OAuth
+            if "kalvium.community" in self.driver.current_url:
+                if self.is_dashboard_loaded():
+                    logger.info("Dashboard loaded; session persisted. Skipping login.")
+                    self.logged_in = True
+                    return True
 
             # Click the "Continue with Google" button (try multiple selectors)
             selectors = [
@@ -137,9 +172,12 @@ class AttendanceBot:
             except Exception as e:
                 logger.info(f"Password step not found or not required: {e}")
 
-            # Wait until redirected back to Kalvium (not on accounts.google)
+            # Wait for redirect back to Kalvium (allow time for 2FA/consent)
+            logger.info("Waiting up to 90s for login, 2FA or consent...")
             try:
-                wait.until(lambda d: "kalvium.community" in d.current_url and "accounts.google" not in d.current_url)
+                WebDriverWait(self.driver, 90).until(
+                    lambda d: "kalvium.community" in d.current_url and "accounts.google" not in d.current_url
+                )
             except Exception:
                 # If still in popup, close and switch back
                 if len(self.driver.window_handles) > 1:
@@ -178,9 +216,21 @@ class AttendanceBot:
                 # If the only option visible is 'Continue as ...', leave it untouched
                 pass
 
-            logger.info("Successfully completed Google login")
-            self.logged_in = True
-            return True
+            # Final check: ensure dashboard is visible
+            if self.is_dashboard_loaded():
+                logger.info("Successfully completed Google login and dashboard is visible")
+                self.logged_in = True
+                return True
+
+            # If we reach here, capture a screenshot for debugging
+            try:
+                screenshot_path = os.path.join(os.path.dirname(__file__), 'login_debug.png')
+                self.driver.save_screenshot(screenshot_path)
+                logger.error(f"Login completed but dashboard not detected; screenshot saved to {screenshot_path}")
+            except Exception:
+                pass
+
+            return False
 
         except Exception as e:
             logger.error(f"Login failed: {e}")
@@ -230,89 +280,7 @@ class AttendanceBot:
             self.driver.quit()
             logger.info("WebDriver closed")
 
-    def get_attendance_status(self):
-        """Determine attendance status on the Kalvium dashboard.
-        Returns one of: 'PRESENT', 'LIVE', 'NONE'.
-        - PRESENT: The UI shows that the user is already marked present
-        - LIVE: Attendance window is open (button or banner present)
-        - NONE: No attendance indicator found
-        """
-        try:
-            if not self.logged_in:
-                return 'NONE'
-
-            # Wait for dashboard elements to render
-            wait = WebDriverWait(self.driver, 10)
-            try:
-                wait.until(lambda d: d.execute_script('return document.readyState') == 'complete')
-            except Exception:
-                pass
-
-            # Try to wait for the "My Day" section or header
-            dashboard_candidates = [
-                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'my day')]",
-                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'your kalvium apps')]",
-            ]
-            for xp in dashboard_candidates:
-                try:
-                    wait.until(EC.presence_of_element_located((By.XPATH, xp)))
-                    break
-                except Exception:
-                    continue
-
-            # Helper to find a visible element by xpath
-            def find_visible(xpath):
-                elems = self.driver.find_elements(By.XPATH, xpath)
-                for el in elems:
-                    try:
-                        if el.is_displayed():
-                            return el
-                    except Exception:
-                        continue
-                return None
-
-            # PRESENT indicators (blue dot + 'Present' or message text)
-            present_xpaths = [
-                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'you\'re marked as present')]",
-                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'marked as present')]",
-                "//span[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'present')]",
-                "//div[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'present')]",
-                "//*[@class and contains(translate(@class,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'present')]",
-                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'yay! you\'re marked as present')]",
-            ]
-            for xp in present_xpaths:
-                el = find_visible(xp)
-                if el:
-                    logger.info("Detected 'Present' status on dashboard")
-                    return 'PRESENT'
-
-            # LIVE indicators (button or banner)
-            live_xpaths = [
-                "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'mark attendance')]",
-                "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'attendance is live')]",
-            ]
-            for xp in live_xpaths:
-                el = find_visible(xp)
-                if el:
-                    logger.info("Detected attendance is LIVE")
-                    return 'LIVE'
-
-            # Fallback: plain text search across the page
-            try:
-                body_text = (self.driver.execute_script("return document.body.innerText") or "").lower()
-                if "you're marked as present" in body_text or "yay! you're marked as present" in body_text:
-                    logger.info("Detected 'Present' via text fallback")
-                    return 'PRESENT'
-                if "attendance is live" in body_text or "mark attendance" in body_text:
-                    logger.info("Detected 'LIVE' via text fallback")
-                    return 'LIVE'
-            except Exception:
-                pass
-
-            return 'NONE'
-        except Exception as e:
-            logger.error(f"Error determining attendance status: {e}")
-            return 'NONE'
+    
 
 
 def create_bot(email, password, url):
