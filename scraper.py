@@ -242,19 +242,46 @@ class AttendanceBot:
             if not self.logged_in:
                 return False
             
-            # Look for the "Mark Attendance" button
-            # Adjust selectors based on actual button attributes
+            # Try multiple selector strategies for the Mark Attendance button
+            # Strategy 1: Direct button text match
             mark_attendance_buttons = self.driver.find_elements(
                 By.XPATH, 
                 "//button[contains(text(), 'Mark Attendance')] | //button[contains(text(), 'mark attendance')]"
             )
             
             if mark_attendance_buttons:
-                # Check if any button is visible and clickable
                 for button in mark_attendance_buttons:
                     if button.is_displayed():
-                        logger.info("Mark Attendance button found and visible!")
+                        logger.info("✓ Mark Attendance button found and visible!")
                         return True
+            
+            # Strategy 2: Look for nested span with text
+            try:
+                nested_buttons = self.driver.find_elements(
+                    By.XPATH,
+                    "//button[.//span[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'mark attendance')]]"
+                )
+                if nested_buttons:
+                    for button in nested_buttons:
+                        if button.is_displayed():
+                            logger.info("✓ Mark Attendance button found (nested span) and visible!")
+                            return True
+            except Exception:
+                pass
+            
+            # Strategy 3: Search page text as fallback
+            try:
+                page_text = (self.driver.execute_script("return document.body.innerText") or "").lower()
+                if "mark attendance" in page_text:
+                    logger.info("⚠ Detected 'mark attendance' in page text (button may be rendered differently)")
+                    # Log all buttons on page for debugging
+                    all_buttons = self.driver.find_elements(By.TAG_NAME, "button")
+                    button_texts = [btn.text.strip() for btn in all_buttons if btn.text.strip()]
+                    if button_texts:
+                        logger.info(f"Buttons found: {button_texts}")
+                    return True
+            except Exception:
+                pass
             
             return False
             

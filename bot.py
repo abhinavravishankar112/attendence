@@ -118,11 +118,16 @@ async def check_attendance():
         # Refresh and check for the Mark Attendance button
         if not attendance_marked:
             scraper_bot.refresh_page()
-            if scraper_bot.check_attendance_button():
-                logger.info("Attendance button detected!")
+            button_found = scraper_bot.check_attendance_button()
+            logger.info(f"[Check] Button found: {button_found}")
+            
+            if button_found:
+                logger.info("✓ Attendance button detected!")
                 if await send_attendance_ping():
                     attendance_marked = True
-                    logger.info(f"Successfully pinged @everyone for class {current_class_period}")
+                    logger.info(f"✓ Successfully pinged @everyone for class {current_class_period}")
+            else:
+                logger.debug("Attendance button not found, will check again in 10s")
     
     except Exception as e:
         logger.error(f"Error in check_attendance task: {e}")
