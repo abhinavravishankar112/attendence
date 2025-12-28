@@ -1,14 +1,6 @@
-# Kalvium Attendance Discord Bot
+# Minimal Attendance Bot
 
-A Discord bot that monitors the Kalvium attendance system and automatically pings @everyone when the "Mark Attendance" button appears.
-
-## Features
-
-- 🔐 **Secure Google Login**: Automatically logs into Kaivium using your Google account
-- ⏰ **Schedule-Based Monitoring**: Only checks during configured class times
-- 🔔 **Automatic Pings**: Sends @everyone ping when attendance opens
-- ⚙️ **Configurable**: Easy to customize class schedule, timezone, and check frequency
-- 📊 **Status Commands**: Check bot status and configuration from Discord
+Opens Kalvium, logs in via Google, takes a screenshot every 10 seconds, sends to Gemini for vision detection, and pings the Discord channel when "Mark Attendance" appears.
 
 ## Setup Instructions
 
@@ -39,6 +31,10 @@ DISCORD_TOKEN=your_discord_bot_token
 ATTENDANCE_CHANNEL_ID=your_channel_id
 GOOGLE_EMAIL=your_email@gmail.com
 GOOGLE_PASSWORD=your_password
+GEMINI_API_KEY=your_gemini_api_key
+# Optional:
+# GEMINI_MODEL=gemini-1.5-flash
+CHECK_INTERVAL=10
 ```
 
 ### 3. Get Discord Token
@@ -59,23 +55,10 @@ GOOGLE_PASSWORD=your_password
 2. Right-click on the "attendance" channel and select "Copy Channel ID"
 3. Add this ID to `.env`
 
-### 5. Configure Class Schedule (Optional)
+### Run
 
-Edit `config.py` to adjust:
-- Class times (currently 8:30-12:45 Mon-Sat)
-- Timezone (currently Asia/Kolkata)
-- Check interval (currently 10 seconds)
-- Ping message format
-
-Example:
-```python
-CLASS_SCHEDULE = {
-    0: [  # Monday
-        ('08:30', '09:30'),
-        ('09:30', '10:30'),
-    ],
-    # ... more days
-}
+```bash
+python bot.py
 ```
 
 ### 6. Run the Bot
@@ -91,34 +74,28 @@ The bot will:
 - Send @everyone ping when button appears
 - Rest until the next class period
 
-## Discord Commands
+## Behavior
 
-- `!status` - Check current bot status and whether in class time
-- `!config` - Display current configuration and class schedule
-- `!test` - Send a test ping to verify Discord integration
+- Refreshes the page, captures a screenshot into `debug_output/`, and asks Gemini if attendance is live.
+- Sends `@everyone` once per run when detection is positive.
 
 ## Troubleshooting
 
 ### Bot not detecting button
-- Check if the button selector in `scraper.py` matches the actual Kalvium page
-- Run `!status` to verify bot is in checking mode
-- Inspect the Kalvium website to find correct element selectors
+- Ensure `GEMINI_API_KEY` is set and has quota.
+- Verify Chrome is installed.
 
 ### Google login fails
-- Verify credentials in `.env` are correct
-- Check if 2FA is enabled on Google account (may need app password)
-- Try logging in manually first to ensure account works
+- Verify credentials in `.env`.
+- If 2FA is enabled, use an App Password.
 
 ### Bot not sending messages
-- Verify Channel ID is correct: `!status`
-- Ensure bot has "Send Messages" and "Mention Everyone" permissions
-- Test with `!test` command
+- Verify Channel ID is correct.
+- Ensure bot has "Send Messages" and "Mention Everyone" permissions.
 
-### Permission issues
-Make sure your Discord bot has these permissions in the attendance channel:
+### Permissions
 - Send Messages
 - Mention Everyone
-- Embed Links (for status/config commands)
 
 ## Hosting Options
 
@@ -155,10 +132,9 @@ CMD ["python", "bot.py"]
 
 ## Notes
 
-- The bot checks every 10 seconds (configurable in `config.py`)
-- It only checks during configured class hours
-- Once attendance is marked, it won't ping again for the same class
-- The browser window is visible by default (for debugging); uncomment `--headless` in `scraper.py` to hide it
+- Checks every 10 seconds by default.
+- Sends one ping per run when detected.
+- Browser window is visible by default.
 
 ## Support
 

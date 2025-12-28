@@ -64,3 +64,11 @@ CLASS_SCHEDULE = {
 
 # Discord Message Configuration
 PING_MESSAGE = "@everyone attendance is now live"
+
+# Vision Detection (Gemini)
+# Set GEMINI_API_KEY in your environment to enable vision-based detection
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-1.5-flash')
+
+# Detection mode: 'vision' uses screenshot + Gemini; 'scraper' uses HTML/text selectors
+DETECTION_MODE = os.getenv('DETECTION_MODE', 'vision').strip().lower()

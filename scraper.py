@@ -1,15 +1,21 @@
 """
-Web scraper for Kalvium attendance button detection
-Uses Selenium with Google login
+Web scraper for Kalvium attendance detection.
+Supports HTML/text selectors and vision-based detection via Gemini.
 """
 import os
+import re
 import time
 import logging
+import time
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+
+from config import GEMINI_API_KEY, GEMINI_MODEL
+from gemini_vision import detect_attendance_in_image
 
 logger = logging.getLogger(__name__)
 
@@ -236,57 +242,108 @@ class AttendanceBot:
             logger.error(f"Login failed: {e}")
             return False
 
-    def check_attendance_button(self):
+    def check_attendance_button(self, debug=False):
         """Check if 'Mark Attendance' button is visible"""
         try:
             if not self.logged_in:
+                logger.warning("Not logged in, cannot check attendance")
                 return False
             
-            # Try multiple selector strategies for the Mark Attendance button
-            # Strategy 1: Direct button text match
-            mark_attendance_buttons = self.driver.find_elements(
-                By.XPATH, 
-                "//button[contains(text(), 'Mark Attendance')] | //button[contains(text(), 'mark attendance')]"
-            )
+            # Wait a bit for dynamic content to load
+            time.sleep(1)
             
-            if mark_attendance_buttons:
-                for button in mark_attendance_buttons:
-                    if button.is_displayed():
-                        logger.info("✓ Mark Attendance button found and visible!")
-                        return True
+            # Get page text for multiple checks
+            page_text = (self.driver.execute_script("return document.body.innerText") or "")
+            page_text_lower = page_text.lower()
             
-            # Strategy 2: Look for nested span with text
-            try:
-                nested_buttons = self.driver.find_elements(
-                    By.XPATH,
-                    "//button[.//span[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'mark attendance')]]"
-                )
-                if nested_buttons:
-                    for button in nested_buttons:
-                        if button.is_displayed():
-                            logger.info("✓ Mark Attendance button found (nested span) and visible!")
-                            return True
-            except Exception:
-                pass
+            # Get page HTML for deeper inspection
+            page_html = self.driver.page_source.lower()
             
-            # Strategy 3: Search page text as fallback
-            try:
-                page_text = (self.driver.execute_script("return document.body.innerText") or "").lower()
-                if "mark attendance" in page_text:
-                    logger.info("⚠ Detected 'mark attendance' in page text (button may be rendered differently)")
-                    # Log all buttons on page for debugging
-                    all_buttons = self.driver.find_elements(By.TAG_NAME, "button")
-                    button_texts = [btn.text.strip() for btn in all_buttons if btn.text.strip()]
-                    if button_texts:
-                        logger.info(f"Buttons found: {button_texts}")
+            if debug:
+                # Save full page text and HTML to files for debugging
+                debug_dir = os.path.join(os.path.dirname(__file__), 'debug_output')
+                os.makedirs(debug_dir, exist_ok=True)
+                
+                timestamp = time.strftime('%Y%m%d_%H%M%S')
+                text_file = os.path.join(debug_dir, f'page_text_{timestamp}.txt')
+                html_file = os.path.join(debug_dir, f'page_html_{timestamp}.html')
+                screenshot_file = os.path.join(debug_dir, f'screenshot_{timestamp}.png')
+                
+                with open(text_file, 'w', encoding='utf-8') as f:
+                    f.write(page_text)
+                with open(html_file, 'w', encoding='utf-8') as f:
+                    f.write(self.driver.page_source)
+                self.driver.save_screenshot(screenshot_file)
+                
+                logger.info(f"Debug files saved to {debug_dir}")
+                logger.info(f"Current URL: {self.driver.current_url}")
+            
+            # KEY INDICATOR 1: "Attendance is live..." text
+            if "attendance is live" in page_text_lower:
+                logger.info("✓ Detected 'Attendance is live...' indicator!")
+                return True
+            
+            # KEY INDICATOR 2: Timer countdown pattern (e.g., "3m 43s left")
+            timer_patterns = [
+                r'\d+m\s+\d+s\s+left',
+                r'\d+\s*min\s+\d+\s*sec\s+left',
+                r'time\s+left[:\s]+\d+',
+            ]
+            for pattern in timer_patterns:
+                if re.search(pattern, page_text_lower):
+                    match = re.search(pattern, page_text_lower)
+                    logger.info(f"✓ Detected attendance timer: {match.group()}")
                     return True
-            except Exception:
-                pass
+            
+            # KEY INDICATOR 3: "Mark Attendance" button (multiple selectors)
+            button_selectors = [
+                "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'mark attendance')]",
+                "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'attendance')]",
+                "//*[@role='button'][contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'mark attendance')]",
+                "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), 'mark attendance')]",
+            ]
+            
+            for selector in button_selectors:
+                try:
+                    buttons = self.driver.find_elements(By.XPATH, selector)
+                    for button in buttons:
+                        if button.is_displayed():
+                            logger.info(f"✓ Attendance button found with selector: {selector}")
+                            logger.info(f"  Button text: {button.text[:50]}")
+                            return True
+                except Exception as e:
+                    logger.debug(f"Selector failed: {selector} - {e}")
+            
+            # KEY INDICATOR 4: "Mark your attendance to confirm" text
+            attendance_phrases = [
+                "mark your attendance to confirm",
+                "mark your attendance",
+                "attendance is now live",
+                "click to mark attendance",
+                "submit attendance",
+            ]
+            
+            for phrase in attendance_phrases:
+                if phrase in page_text_lower:
+                    logger.info(f"✓ Detected phrase: '{phrase}'")
+                    return True
+            
+            # KEY INDICATOR 5: Check HTML for button classes or IDs
+            if any(indicator in page_html for indicator in ['attendance-button', 'mark-attendance', 'btn-attendance']):
+                logger.info("✓ Found attendance-related HTML element!")
+                return True
+            
+            # Debug logging when nothing found
+            logger.debug(f"No attendance indicators found.")
+            logger.debug(f"Page text preview (first 300 chars): {page_text[:300]}")
+            logger.debug(f"Current URL: {self.driver.current_url}")
             
             return False
             
         except Exception as e:
             logger.error(f"Error checking for button: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return False
 
     def refresh_page(self):
@@ -307,6 +364,45 @@ class AttendanceBot:
             self.driver.quit()
             logger.info("WebDriver closed")
 
+    def check_attendance_by_vision(self, debug: bool = False):
+        """Capture a screenshot and use Gemini vision to detect attendance.
+
+        Returns True if Gemini clearly indicates the presence of 'Mark Attendance' or
+        attendance-live indicator, False otherwise. Returns False if not logged in
+        or on error.
+        """
+        try:
+            if not self.logged_in:
+                logger.warning("Not logged in, cannot run vision detection")
+                return False
+
+            # Ensure output dir
+            debug_dir = os.path.join(os.path.dirname(__file__), 'debug_output')
+            os.makedirs(debug_dir, exist_ok=True)
+
+            timestamp = time.strftime('%Y%m%d_%H%M%S')
+            screenshot_file = os.path.join(debug_dir, f'vision_screenshot_{timestamp}.png')
+
+            # Small delay to allow UI to stabilize
+            time.sleep(0.6)
+            self.driver.save_screenshot(screenshot_file)
+            logger.info(f"Saved screenshot for vision: {screenshot_file}")
+
+            if not GEMINI_API_KEY:
+                logger.error("GEMINI_API_KEY not set; vision detection disabled")
+                return False
+
+            result = detect_attendance_in_image(screenshot_file, GEMINI_API_KEY, GEMINI_MODEL)
+            if result is None:
+                logger.warning("Gemini returned an indeterminate result for attendance detection")
+                return False
+
+            logger.info(f"Vision detection result: {result}")
+            return bool(result)
+        except Exception as e:
+            logger.error(f"Vision-based detection failed: {e}")
+            return False
+
     
 
 
@@ -317,3 +413,4 @@ def create_bot(email, password, url):
         if bot.login_with_google():
             return bot
     return None
+
