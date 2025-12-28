@@ -104,14 +104,6 @@ The bot will:
 - Runs only while your computer is on
 - Good for testing
 
-### VPS/Cloud Server
-Options:
-- **AWS EC2** (free tier available)
-- **DigitalOcean** (~$5/month)
-- **Heroku** (free tier removed, ~$7/month)
-- **Replit** (free for public projects)
-- **Railway** (~$5/month)
-
 ### Docker
 Create a `Dockerfile` to containerize the bot for easier deployment:
 ```dockerfile
