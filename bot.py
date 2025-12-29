@@ -57,7 +57,8 @@ async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageabl
                         logger.info("Sent attendance ping via Discord (local match)")
                     except Exception as e:
                         logger.error(f"Failed to send Discord message: {e}")
-                    await asyncio.sleep(60)
+                    logger.info("Attendance detected, exiting bot")
+                    return  # Exit after detecting
                 else:
                     # Fallback to Gemini if available
                     res = detect_attendance_in_image(shot, os.getenv('GEMINI_API_KEY'), os.getenv('GEMINI_MODEL', 'gemini-1.5-flash'))
@@ -68,8 +69,8 @@ async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageabl
                             logger.info("Sent attendance ping via Discord")
                         except Exception as e:
                             logger.error(f"Failed to send Discord message: {e}")
-                        # After successful send, sleep longer to avoid spam
-                        await asyncio.sleep(60)
+                        logger.info("Attendance detected, exiting bot")
+                        return  # Exit after detecting
             else:
                 logger.warning("Failed to capture screenshot")
 

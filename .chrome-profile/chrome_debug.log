@@ -1,4 +1,6 @@
-[13959:4445315:1229/105025.393726:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:206] No machine level policy manager exists.
-[13959:4445367:1229/105030.130951:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
-[13959:4445367:1229/105052.664917:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
-[13959:4445367:1229/105146.985881:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[15159:4492801:1229/114533.865848:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:206] No machine level policy manager exists.
+[15159:4492801:1229/114551.105358:INFO:CONSOLE:491] "[2025-12-29T06:15:51.105Z]  @firebase/firestore: Firestore (11.0.2): WebChannelConnection RPC 'Listen' stream 0x31c20dac transport errored: [object Object]", source: https://kalvium.community/assets/index-4ca6d4f8.js (491)
+[15159:4492801:1229/114551.106024:INFO:CONSOLE:491] "[2025-12-29T06:15:51.105Z]  @firebase/firestore: Firestore (11.0.2): Could not reach Cloud Firestore backend. Connection failed 1 times. Most recent error: FirebaseError: [code=unavailable]: The operation could not be completed
+This typically indicates that your device does not have a healthy Internet connection at the moment. The client will operate in offline mode until it is able to successfully connect to the backend.", source: https://kalvium.community/assets/index-4ca6d4f8.js (491)
+[15159:4492887:1229/114555.507411:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[15159:4492887:1229/114617.576974:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
