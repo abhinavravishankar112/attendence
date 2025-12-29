@@ -1,43 +1,13 @@
-"""
-Web scraper for Kalvium attendance detection.
-Supports HTML/text selectors and vision-based detection via Gemini.
-"""
-import os
-import re
-import time
-import logging
-import time
-import os
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
+"""scraper.py removed — replaced by simple_scraper.py for minimal functionality."""
 
-from config import GEMINI_API_KEY, GEMINI_MODEL
-from gemini_vision import detect_attendance_in_image
+# The original complex scraper was removed to keep the project minimal.
+# Use `simple_scraper.py` which provides a small API:
+#   SimpleScraper(email, password, url)
+#     - setup_driver()
+#     - login_with_google()
+#     - take_screenshot(dest_path)
+#     - close()
 
-logger = logging.getLogger(__name__)
-
-
-class AttendanceBot:
-    def __init__(self, email, password, url):
-        self.email = email
-        self.password = password
-        self.url = url
-        self.driver = None
-        self.logged_in = False
-
-    def setup_driver(self):
-        """Initialize and setup Selenium WebDriver"""
-        try:
-            options = Options()
-            # Uncomment the line below to run in headless mode (no browser window)
-            # options.add_argument('--headless')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-            options.add_argument('--start-maximized')
-            options.add_argument('--disable-gpu')
             options.add_argument('--no-first-run')
             options.add_argument('--no-default-browser-check')
             options.add_argument('--disable-sync')

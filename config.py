@@ -18,6 +18,9 @@ GOOGLE_PASSWORD = os.getenv('GOOGLE_PASSWORD')
 KALVIUM_URL = "https://kalvium.community"  # Update if different
 CHECK_INTERVAL = 10  # seconds - how often to check for the button
 
+# How many seconds to wait after refreshing before taking a screenshot
+SCREENSHOT_DELAY = int(os.getenv('SCREENSHOT_DELAY', '2'))
+
 # Timezone
 TIMEZONE = 'Asia/Kolkata'  # IST
 

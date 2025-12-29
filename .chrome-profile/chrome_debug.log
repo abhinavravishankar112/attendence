@@ -1,12 +1,5 @@
-[2076:4137506:1228/155527.439378:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:206] No machine level policy manager exists.
-[2076:4137577:1228/155528.328952:ERROR:base/process/process_mac.cc:53] task_policy_set TASK_CATEGORY_POLICY: (os/kern) invalid argument (4)
-[2076:4137577:1228/155528.328983:ERROR:base/process/process_mac.cc:98] task_policy_set TASK_SUPPRESSION_POLICY: (os/kern) invalid argument (4)
-[2083:4137619:1228/155528.597571:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 1
-[2076:4137560:1228/155531.727455:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
-[2076:4137560:1228/155559.741805:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
-[2076:4137560:1228/155659.978369:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
-[2083:4137619:1228/155709.214712:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 125
-[2083:4137619:1228/155709.214756:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 131
-[2083:4137619:1228/155709.214768:WARNING:net/spdy/spdy_session.cc:3071] Received HEADERS for invalid stream 127
-[2083:4137617:1228/155709.237697:WARNING:net/extras/sqlite/sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net/extras/sqlite/sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
-[2083:4137617:1228/155709.237726:WARNING:net/extras/sqlite/sqlite_persistent_store_backend_base.cc:176] Failed to post task from FlushAndNotifyInBackground@net/extras/sqlite/sqlite_persistent_store_backend_base.cc:226 to client_task_runner_.
+[7704:4345875:1229/083813.122895:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:206] No machine level policy manager exists.
+[7704:4345932:1229/083817.417524:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[7704:4345932:1229/083841.659700:ERROR:google_apis/gcm/engine/registration_request.cc:292] Registration response error message: DEPRECATED_ENDPOINT
+[7710:4345952:1229/083929.891706:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:505] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[7710:4345952:1229/083929.891925:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:262] Invalid mailbox.
