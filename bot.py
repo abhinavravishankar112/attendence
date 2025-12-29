@@ -41,9 +41,28 @@ async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageabl
             ok = scraper.take_screenshot(shot)
             if ok:
                 logger.info(f"Screenshot saved: {shot}")
-                res = detect_attendance_in_image(shot, os.getenv('GEMINI_API_KEY'), os.getenv('GEMINI_MODEL', 'gemini-1.5-flash'))
-                logger.info(f"Vision result: {res}")
-                if res:
+                # First try fast local template matching using the reference image
+                template = os.path.join(os.path.dirname(__file__), 'test_attendance.png')
+                local_res = None
+                try:
+                    from gemini_vision import detect_attendance_local
+                    local_res = detect_attendance_local(shot, template)
+                except Exception:
+                    local_res = None
+
+                if local_res:
+                    logger.info("Local template matched — sending ping")
+                    try:
+                        await channel.send(PING_MESSAGE)
+                        logger.info("Sent attendance ping via Discord (local match)")
+                    except Exception as e:
+                        logger.error(f"Failed to send Discord message: {e}")
+                    await asyncio.sleep(60)
+                else:
+                    # Fallback to Gemini if available
+                    res = detect_attendance_in_image(shot, os.getenv('GEMINI_API_KEY'), os.getenv('GEMINI_MODEL', 'gemini-1.5-flash'))
+                    logger.info(f"Vision result: {res}")
+                    if res:
                     try:
                         await channel.send(PING_MESSAGE)
                         logger.info("Sent attendance ping via Discord")
