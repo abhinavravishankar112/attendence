@@ -42,7 +42,7 @@ async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageabl
             if ok:
                 logger.info(f"Screenshot saved: {shot}")
                 # First try fast local template matching using the reference image
-                template = os.path.join(os.path.dirname(__file__), 'test_attendance.png')
+                template = os.path.join(os.path.dirname(__file__), 'started.png')
                 local_res = None
                 try:
                     from gemini_vision import detect_attendance_local

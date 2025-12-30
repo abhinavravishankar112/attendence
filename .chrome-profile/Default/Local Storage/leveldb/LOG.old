@@ -1,3 +1,5 @@
-2025/12/29-10:50:25.439 43d507 Reusing MANIFEST /Users/ars/Desktop/attendence/.chrome-profile/Default/Local Storage/leveldb/MANIFEST-000001
-2025/12/29-10:50:25.441 43d507 Recovering log #3
-2025/12/29-10:50:25.441 43d507 Reusing old log /Users/ars/Desktop/attendence/.chrome-profile/Default/Local Storage/leveldb/000003.log 
+2025/12/30-09:34:15.976 48a0eb Reusing MANIFEST /Users/ars/Desktop/attendence/.chrome-profile/Default/Local Storage/leveldb/MANIFEST-000001
+2025/12/30-09:34:15.978 48a0eb Recovering log #3
+2025/12/30-09:34:15.978 48a0eb Level-0 table #3: started
+2025/12/30-09:34:15.987 48a0eb Level-0 table #3: 21765 bytes OK
+2025/12/30-09:34:15.988 48a0eb Delete type=0 #3
