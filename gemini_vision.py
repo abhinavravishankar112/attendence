@@ -61,7 +61,7 @@ def detect_attendance_in_image(image_path: str, api_key: str, model_name: str = 
         return None
 
 
-def detect_attendance_local(image_path: str, template_path: str, threshold: float = 0.75) -> Optional[bool]:
+def detect_attendance_local(image_path: str, template_path: str, threshold: float = 0.85) -> Optional[bool]:
     """
     Use OpenCV template matching to detect the reference button image inside a screenshot.
     Returns True if a match >= threshold is found, False if not, None on error.
@@ -91,7 +91,7 @@ def detect_attendance_local(image_path: str, template_path: str, threshold: floa
 
         res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        logger.info(f"Local template match max val: {max_val:.3f}")
+        logger.info(f"Local template match max val: {max_val:.3f}; threshold: {threshold:.2f}")
         return max_val >= threshold
     except Exception as e:
         logger.error(f"Local detection failed: {e}")

@@ -17,7 +17,7 @@ from config import (
     PING_MESSAGE,
 )
 from simple_scraper import SimpleScraper
-from gemini_vision import detect_attendance_in_image
+from gemini_vision import detect_attendance_local
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,10 +27,15 @@ client = discord.Client(intents=intents)
 
 
 async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageable):
-    """Loop: take screenshot every CHECK_INTERVAL seconds and ask Gemini."""
+    """Loop: take screenshot every CHECK_INTERVAL seconds and only ping on exact button match."""
     try:
         debug_dir = os.path.join(os.path.dirname(__file__), 'debug_output')
         os.makedirs(debug_dir, exist_ok=True)
+
+        template = os.path.join(os.path.dirname(__file__), 'started.png')
+        if not os.path.exists(template):
+            logger.error(f"Template image not found at {template}; cannot detect attendance")
+            return
 
         while True:
             ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
@@ -41,17 +46,11 @@ async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageabl
             ok = scraper.take_screenshot(shot)
             if ok:
                 logger.info(f"Screenshot saved: {shot}")
-                # First try fast local template matching using the reference image
-                template = os.path.join(os.path.dirname(__file__), 'started.png')
-                local_res = None
-                try:
-                    from gemini_vision import detect_attendance_local
-                    local_res = detect_attendance_local(shot, template)
-                except Exception:
-                    local_res = None
+                # Only act when the exact reference button is found in the screenshot
+                local_res = detect_attendance_local(shot, template)
 
                 if local_res:
-                    logger.info("Local template matched — sending ping")
+                    logger.info("Template matched — sending ping")
                     try:
                         await channel.send(PING_MESSAGE)
                         logger.info("Sent attendance ping via Discord (local match)")
@@ -59,18 +58,6 @@ async def detection_loop(scraper: SimpleScraper, channel: discord.abc.Messageabl
                         logger.error(f"Failed to send Discord message: {e}")
                     logger.info("Attendance detected, exiting bot")
                     return  # Exit after detecting
-                else:
-                    # Fallback to Gemini if available
-                    res = detect_attendance_in_image(shot, os.getenv('GEMINI_API_KEY'), os.getenv('GEMINI_MODEL', 'gemini-1.5-flash'))
-                    logger.info(f"Vision result: {res}")
-                    if res:
-                        try:
-                            await channel.send(PING_MESSAGE)
-                            logger.info("Sent attendance ping via Discord")
-                        except Exception as e:
-                            logger.error(f"Failed to send Discord message: {e}")
-                        logger.info("Attendance detected, exiting bot")
-                        return  # Exit after detecting
             else:
                 logger.warning("Failed to capture screenshot")
 
